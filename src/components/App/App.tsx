@@ -53,17 +53,13 @@ const App: React.FC = () => {
       <SearchBar onSubmit={handleSearch} />
 
       {paginationComponent}
-
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
       {isFetching && !isLoading && <Loader />}
-
       {!isLoading && movies.length > 0 && (
         <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
-
       {paginationComponent}
-
       {selectedMovie && (
         <MovieModal
           movie={selectedMovie}
