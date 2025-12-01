@@ -47,8 +47,7 @@ const App: React.FC = () => {
       previousLabel="←"
     />
   );
-  // src/services/movieService.ts
-  // 2025-12-02: Trigger Vercel Deploy.
+
   return (
     <div className={styles.wrapper}>
       <SearchBar onSubmit={handleSearch} />
