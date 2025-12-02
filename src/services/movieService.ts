@@ -1,13 +1,17 @@
-//ава
+// movieService.ts
 import axios from "axios";
 import type { MovieApiResponse } from "../types/movie";
 
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
 
 const BASE_URL = "https://api.themoviedb.org/3";
 
 const tmdbApi = axios.create({
   baseURL: BASE_URL,
+  headers: {
+    Authorization: `Bearer ${ACCESS_TOKEN}`,
+    "Content-Type": "application/json;charset=utf-8",
+  },
 });
 
 export const getFullImageUrl = (
@@ -35,7 +39,6 @@ export const fetchMovies = async (
 
   const response = await tmdbApi.get<MovieApiResponse>("/search/movie", {
     params: {
-      api_key: API_KEY,
       query,
       page,
       include_adult: false,
