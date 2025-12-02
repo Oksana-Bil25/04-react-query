@@ -1,13 +1,10 @@
-// movieService.ts
 import axios from "axios";
 import type { MovieApiResponse } from "../types/movie";
 
 const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
 
-const BASE_URL = "https://api.themoviedb.org/3";
-
 const tmdbApi = axios.create({
-  baseURL: BASE_URL,
+  baseURL: "https://api.themoviedb.org/3",
   headers: {
     Authorization: `Bearer ${ACCESS_TOKEN}`,
     "Content-Type": "application/json;charset=utf-8",

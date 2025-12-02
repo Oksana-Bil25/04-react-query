@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 import { useQuery } from "@tanstack/react-query";
 
@@ -18,6 +18,19 @@ const App: React.FC = () => {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
+  // ---- Тимчасова перевірка токена Vercel ----
+  useEffect(() => {
+    console.log(
+      "Перші 10 символів токена Vercel:",
+      import.meta.env.VITE_TMDB_ACCESS_TOKEN?.slice(0, 10)
+    );
+    console.log(
+      "Повний токен (для перевірки локально, не пушити на гіт!):",
+      import.meta.env.VITE_TMDB_ACCESS_TOKEN
+    );
+  }, []);
+  // -------------------------------------------
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setPage(1);
@@ -34,19 +47,20 @@ const App: React.FC = () => {
   const movies = data?.results ?? [];
   const totalPages = data?.total_pages ?? 0;
 
-  const paginationComponent = totalPages > 1 && (
-    <ReactPaginate
-      pageCount={totalPages}
-      pageRangeDisplayed={5}
-      marginPagesDisplayed={1}
-      onPageChange={({ selected }) => setPage(selected + 1)}
-      forcePage={page - 1}
-      containerClassName={styles.pagination}
-      activeClassName={styles.active}
-      nextLabel="→"
-      previousLabel="←"
-    />
-  );
+  const paginationComponent =
+    totalPages > 1 ? (
+      <ReactPaginate
+        pageCount={totalPages}
+        pageRangeDisplayed={5}
+        marginPagesDisplayed={1}
+        onPageChange={({ selected }) => setPage(selected + 1)}
+        forcePage={page - 1}
+        containerClassName={styles.pagination}
+        activeClassName={styles.active}
+        nextLabel="→"
+        previousLabel="←"
+      />
+    ) : null;
 
   return (
     <div className={styles.wrapper}>
