@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ReactPaginate from "react-paginate";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,19 +17,6 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-
-  // ---- Тимчасова перевірка токена Vercel ----
-  useEffect(() => {
-    console.log(
-      "Перші 10 символів токена Vercel:",
-      import.meta.env.VITE_TMDB_ACCESS_TOKEN?.slice(0, 10)
-    );
-    console.log(
-      "Повний токен (для перевірки локально, не пушити на гіт!):",
-      import.meta.env.VITE_TMDB_ACCESS_TOKEN
-    );
-  }, []);
-  // -------------------------------------------
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

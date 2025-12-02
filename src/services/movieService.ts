@@ -1,7 +1,8 @@
 import axios from "axios";
 import type { MovieApiResponse } from "../types/movie";
 
-const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
+const ACCESS_TOKEN =
+  "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzYWM0N2ZiOWJiNjEyOGMxNzJhMDE5MmQ4ZmM0Y2UwZSIsIm5iZiI6MTc2Mjg1NzQ3OS41MDQ5OTk5LCJzdWIiOiI2OTEzMTIwN2QwNDUwZmEzMDYzYTM2N2QiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.nj1JlhrOTDtXhfIzto7u-bT3TnRsFvIDvapvJ2BAiMQ";
 
 const tmdbApi = axios.create({
   baseURL: "https://api.themoviedb.org/3",
