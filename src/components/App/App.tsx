@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 import { useQuery } from "@tanstack/react-query";
+import toast, { Toaster } from "react-hot-toast";
 
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
@@ -9,9 +10,17 @@ import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 import { fetchMovies } from "../../services/movieService";
-import type { Movie, MovieApiResponse } from "../../types/movie";
+import type { Movie } from "../../types/movie";
+import type { MovieApiResponse } from "../../services/movieService";
 
 import styles from "./App.module.css";
+
+const initialData: MovieApiResponse = {
+  page: 1,
+  results: [],
+  total_pages: 0,
+  total_results: 0,
+};
 
 const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,16 +32,32 @@ const App: React.FC = () => {
     setPage(1);
   };
 
+  const handlePageChange = ({ selected }: { selected: number }) => {
+    setPage(selected + 1);
+  };
+
   const { data, isLoading, isError, isFetching } = useQuery<MovieApiResponse>({
     queryKey: ["movies", searchQuery, page],
     queryFn: () => fetchMovies(searchQuery, page),
     enabled: !!searchQuery,
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData) => previousData ?? initialData,
     staleTime: 1000 * 60 * 5,
   });
 
   const movies = data?.results ?? [];
   const totalPages = data?.total_pages ?? 0;
+
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !isFetching &&
+      data &&
+      data.results.length === 0 &&
+      searchQuery
+    ) {
+      toast.error(`No results found for "${searchQuery}". Try another query.`);
+    }
+  }, [data, isLoading, isFetching, searchQuery]);
 
   const paginationComponent =
     totalPages > 1 ? (
@@ -40,7 +65,7 @@ const App: React.FC = () => {
         pageCount={totalPages}
         pageRangeDisplayed={5}
         marginPagesDisplayed={1}
-        onPageChange={({ selected }) => setPage(selected + 1)}
+        onPageChange={handlePageChange}
         forcePage={page - 1}
         containerClassName={styles.pagination}
         activeClassName={styles.active}
@@ -49,18 +74,42 @@ const App: React.FC = () => {
       />
     ) : null;
 
+  let content;
+
+  if (isLoading && !isFetching) {
+    content = <Loader />;
+  } else if (isError) {
+    content = <ErrorMessage />;
+  } else if (movies.length === 0 && !searchQuery) {
+    content = (
+      <p className={styles.initialMessage}>Start searching for movies!</p>
+    ); // Початковий стан
+  } else if (movies.length === 0 && searchQuery) {
+    content = (
+      <p className={styles.noResultsMessage}>
+        No movies found for "{searchQuery}".
+      </p>
+    );
+  } else {
+    content = <MovieGrid movies={movies} onSelect={setSelectedMovie} />;
+  }
+
   return (
     <div className={styles.wrapper}>
+      <Toaster position="top-right" reverseOrder={false} />
+
       <SearchBar onSubmit={handleSearch} />
 
       {paginationComponent}
-      {isLoading && <Loader />}
-      {isError && <ErrorMessage />}
-      {isFetching && !isLoading && <Loader />}
-      {!isLoading && movies.length > 0 && (
-        <MovieGrid movies={movies} onSelect={setSelectedMovie} />
+
+      {content}
+
+      {isFetching && !isLoading && (
+        <p className={styles.fetchingMessage}>Updating results...</p>
       )}
+
       {paginationComponent}
+
       {selectedMovie && (
         <MovieModal
           movie={selectedMovie}

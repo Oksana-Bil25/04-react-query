@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { type FC, useRef } from "react";
 import toast from "react-hot-toast";
 import styles from "./SearchBar.module.css";
 
@@ -7,22 +7,22 @@ export interface SearchBarProps {
 }
 
 const SearchBar: FC<SearchBarProps> = ({ onSubmit }) => {
-  const [inputValue, setInputValue] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const query = inputValue.trim();
+  const handleFormAction = (formData: FormData) => {
+    // Отримуємо значення поля 'query' за його атрибутом name
+    const query = formData.get("query") as string;
+    const trimmedQuery = query.trim();
 
-    if (!query) {
+    // Валідація
+    if (!trimmedQuery) {
       toast.error("Будь ласка, введіть свій пошуковий запит.");
       return;
     }
 
-    onSubmit(query);
-  };
+    onSubmit(trimmedQuery);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    formRef.current?.reset();
   };
 
   return (
@@ -37,13 +37,11 @@ const SearchBar: FC<SearchBarProps> = ({ onSubmit }) => {
           Powered by TMDB
         </a>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form action={handleFormAction} className={styles.form} ref={formRef}>
           <input
             className={styles.input}
             type="text"
             name="query"
-            value={inputValue}
-            onChange={handleChange}
             autoComplete="off"
             placeholder="Шукати фільми..."
             autoFocus

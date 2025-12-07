@@ -1,5 +1,23 @@
+// src/services/movieService.ts
+
 import axios from "axios";
-import type { MovieApiResponse } from "../types/movie";
+// 💡 Примітка: Імпортуємо тільки Movie з файлу типів. MovieApiResponse оголошуємо тут.
+import type { Movie } from "../types/movie";
+
+// =========================================================================
+// 1. Інтерфейс відповіді API (Розміщений тут, а не в types/movie.ts)
+// =========================================================================
+
+export interface MovieApiResponse {
+  page: number;
+  results: Movie[];
+  total_pages: number;
+  total_results: number;
+}
+
+// =========================================================================
+// 2. Конфігурація та допоміжні функції
+// =========================================================================
 
 const ACCESS_TOKEN = import.meta.env.VITE_TMDB_ACCESS_TOKEN;
 
@@ -21,11 +39,16 @@ export const getFullImageUrl = (
   return `https://image.tmdb.org/t/p/${size}${path}`;
 };
 
+// =========================================================================
+// 3. Основна функція запиту
+// =========================================================================
+
 export const fetchMovies = async (
   query: string,
   page: number
 ): Promise<MovieApiResponse> => {
   if (!query) {
+    // Повертаємо пусту відповідь, якщо запит порожній
     return {
       page: 1,
       results: [],
