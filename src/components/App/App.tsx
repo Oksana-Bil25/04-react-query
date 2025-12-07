@@ -9,9 +9,11 @@ import MovieModal from "../MovieModal/MovieModal";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
-import { fetchMovies } from "../../services/movieService";
+import {
+  fetchMovies,
+  type MovieApiResponse,
+} from "../../services/movieService";
 import type { Movie } from "../../types/movie";
-import type { MovieApiResponse } from "../../services/movieService";
 
 import styles from "./App.module.css";
 
@@ -36,11 +38,21 @@ const App: React.FC = () => {
     setPage(selected + 1);
   };
 
+  const openModal = (movie: Movie) => {
+    setSelectedMovie(movie);
+  };
+
+  const closeModal = () => {
+    setSelectedMovie(null);
+  };
+
   const { data, isLoading, isError, isFetching } = useQuery<MovieApiResponse>({
     queryKey: ["movies", searchQuery, page],
     queryFn: () => fetchMovies(searchQuery, page),
     enabled: !!searchQuery,
-    placeholderData: (previousData) => previousData ?? initialData,
+
+    placeholderData: (previousData: MovieApiResponse | undefined) =>
+      previousData ?? initialData,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -59,6 +71,24 @@ const App: React.FC = () => {
     }
   }, [data, isLoading, isFetching, searchQuery]);
 
+  let content;
+
+  if (isLoading && !isFetching) {
+    content = <Loader />;
+  } else if (isError) {
+    content = <ErrorMessage />;
+  } else if (movies.length === 0 && !searchQuery) {
+    content = null;
+  } else if (movies.length === 0 && searchQuery) {
+    content = (
+      <p className={styles.noResultsMessage}>
+        No movies found for "{searchQuery}".
+      </p>
+    );
+  } else {
+    content = <MovieGrid movies={movies} onSelect={openModal} />;
+  }
+
   const paginationComponent =
     totalPages > 1 ? (
       <ReactPaginate
@@ -73,26 +103,6 @@ const App: React.FC = () => {
         previousLabel="←"
       />
     ) : null;
-
-  let content;
-
-  if (isLoading && !isFetching) {
-    content = <Loader />;
-  } else if (isError) {
-    content = <ErrorMessage />;
-  } else if (movies.length === 0 && !searchQuery) {
-    content = (
-      <p className={styles.initialMessage}>Start searching for movies!</p>
-    ); // Початковий стан
-  } else if (movies.length === 0 && searchQuery) {
-    content = (
-      <p className={styles.noResultsMessage}>
-        No movies found for "{searchQuery}".
-      </p>
-    );
-  } else {
-    content = <MovieGrid movies={movies} onSelect={setSelectedMovie} />;
-  }
 
   return (
     <div className={styles.wrapper}>
@@ -111,10 +121,7 @@ const App: React.FC = () => {
       {paginationComponent}
 
       {selectedMovie && (
-        <MovieModal
-          movie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-        />
+        <MovieModal movie={selectedMovie} onClose={closeModal} />
       )}
     </div>
   );
